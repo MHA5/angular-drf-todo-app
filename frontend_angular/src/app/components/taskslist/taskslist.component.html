@@ -1,0 +1,48 @@
+
+
+<div class="container container-margin">
+  <div class="row d-flex">
+    <div class="col-md-8 todo-input-margin">
+    <input type="text" class="todo-input col-md-12 col-centered" placeholder="Take a note..." [(ngModel)]="todoTitle" (keyup.enter)="addTodo()" maxlength="200">
+    </div>
+  </div>
+<div class="row d-flex mt-3">
+  <div class="col-md-8 todo-card-margin">
+    <div class="card-hover-shadow-2x mb-3 card">
+      <div class="card-header-tab card-header">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal"><i class="fa fa-tasks"></i>&nbsp;Tasks List</div>
+      </div>
+      <div class="scroll-area-sm">
+        <div class="ps-show-limits">
+          <div style="position: static;" class="ps ps--active-y">
+            <div class="ps-content">
+              <ul class=" list-group list-group-flush">
+
+                <li class="list-group-item" *ngFor="let todo of this.todos; index as i">
+                  <div class="todo-indicator bg-success"></div>
+                  <div class="widget-content p-0">
+                    <div class="widget-content-wrapper">
+                      <div class="widget-content-left mr-2">
+                        <div class="custom-checkbox custom-control"> <input class="custom-control-input" id="exampleCustomCheckbox{{i}}" type="checkbox" [(ngModel)]="todo.completed" (change)="todoCompleted(todo)"><label class="custom-control-label" for="exampleCustomCheckbox{{i}}">&nbsp;</label> </div>
+                      </div>
+                      <div class="widget-content-left col-md-10">
+                        <div  *ngIf="!todo.editing; else editingTodo" class="widget-heading" [ngClass]="{ 'completed' : todo.completed }" (dblclick)="editTodo(todo)">{{ todo.title }}</div>
+                        <ng-template #editingTodo>
+                          <input class="col-md-12" type="text" [(ngModel)]="todo.title" (blur)="updateTodo(todo)" (keyup.enter)="updateTodo(todo)" (keyup.esc)="cancelEdit(todo)" autofocus>
+                        </ng-template>
+                      </div>
+                      <div class="widget-content-right" (click)="deleteTodo(todo.id)">
+                        <button class="border-0 btn-transition btn btn-outline-danger"> <i class="fa fa-trash"></i> </button> </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-block text-right card-footer"><button class="mr-2 btn btn-link btn-sm">Todos Remaining: {{ remaining() }}</button></div>
+    </div>
+  </div>
+</div>
+</div>
