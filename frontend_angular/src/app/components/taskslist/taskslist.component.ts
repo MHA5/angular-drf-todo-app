@@ -34,7 +34,7 @@ export class TaskslistComponent implements OnInit, OnDestroy {
 
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.gettodosSub.unsubscribe();
     this.createtodosSub.unsubscribe();
     this.completedtodosSub.unsubscribe();
