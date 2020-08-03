@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TodoInterafce } from '../../interface/todo-interface';
 import { TodoService } from '../../services/todo-service.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-taskslist',
@@ -9,34 +10,45 @@ import { TodoService } from '../../services/todo-service.service';
 })
 
 
-export class TaskslistComponent implements OnInit {
+export class TaskslistComponent implements OnInit, OnDestroy {
 
   constructor(public todoService: TodoService) {}
 
   todos: TodoInterafce[];
   todoTitle: string;
   beforeEditCache: string;
+  private gettodosSub: Subscription;
+  private createtodosSub: Subscription;
+  private updatetodosSub: Subscription;
+  private deletetodosSub: Subscription;
+  private completedtodosSub: Subscription;
 
   ngOnInit() {
     this.beforeEditCache = '';
     this.todoTitle = '';
     this.todos = [];
 
-    this.todoService.getTodos().subscribe((response: any) => {
+    this.gettodosSub = this.todoService.getTodos().subscribe((response: any) => {
       this.todos = response;
     });
 
+  }
+
+  ngOnDestroy(): void {
+    this.gettodosSub.unsubscribe();
+    this.createtodosSub.unsubscribe();
+    this.completedtodosSub.unsubscribe();
+    this.deletetodosSub.unsubscribe();
+    this.updatetodosSub.unsubscribe();
   }
 
   addTodo(): void {
     if (this.todoTitle.trim().length === 0) {
       return;
     }
-    this.todoService.createTodo(this.todoTitle, false, false)
+    this.createtodosSub = this.todoService.createTodo(this.todoTitle, false, false)
       .subscribe(() => {
-
-        // needs to be unsub so do outer one
-        this.todoService.getTodos().subscribe((resp: any) => {
+        this.gettodosSub = this.todoService.getTodos().subscribe((resp: any) => {
           this.todos = resp;
         });
       });
@@ -54,9 +66,9 @@ export class TaskslistComponent implements OnInit {
       todo.title = this.beforeEditCache;
     }
     todo.editing = false;
-    this.todoService.completedTodo(todo.id, todo.title, todo.completed, todo.editing)
+    this.completedtodosSub = this.todoService.completedTodo(todo.id, todo.title, todo.completed, todo.editing)
       .subscribe(() => {
-        this.todoService.getTodos().subscribe((resp: any) => {
+        this.gettodosSub = this.todoService.getTodos().subscribe((resp: any) => {
           this.todos = resp;
           todo.editing = false;
         });
@@ -70,9 +82,9 @@ export class TaskslistComponent implements OnInit {
 
   deleteTodo(id: number): void {
     this.todos = this.todos.filter(todo => todo.id !== id);
-    this.todoService.delTodo(id).subscribe((res) => {
-      console.log(res);
-      this.todoService.getTodos().subscribe((resp: any) => {
+    this.deletetodosSub = this.todoService.delTodo(id).subscribe((res) => {
+      // console.log(res);
+      this.gettodosSub = this.todoService.getTodos().subscribe((resp: any) => {
         this.todos = resp;
       });
     });
@@ -81,9 +93,9 @@ export class TaskslistComponent implements OnInit {
   updateTodo(todo: TodoInterafce): void {
     this.beforeEditCache = todo.title;
     todo.editing = false;
-    this.todoService.updateTodo(todo.id, todo.title, todo.editing)
+    this.updatetodosSub = this.todoService.updateTodo(todo.id, todo.title, todo.editing)
       .subscribe(() => {
-        this.todoService.getTodos().subscribe((resp: any) => {
+        this.gettodosSub = this.todoService.getTodos().subscribe((resp: any) => {
           // console.log(resp);
           this.todos = resp;
           todo.editing = false;
